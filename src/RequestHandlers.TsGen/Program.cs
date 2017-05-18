@@ -8,7 +8,7 @@ using RequestHandlers.Http;
 using System.Text.RegularExpressions;
 using System.Runtime.Loader;
 
-namespace PRequestHandlers.TsGen
+namespace RequestHandlers.TsGen
 {
     class Program
     {

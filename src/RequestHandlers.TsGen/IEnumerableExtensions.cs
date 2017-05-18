@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace PRequestHandlers.TsGen
+namespace RequestHandlers.TsGen
 {
 
     internal static class IEnumerableExtensions
