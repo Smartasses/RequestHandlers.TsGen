@@ -1,4 +1,4 @@
-﻿namespace Proleague.Utils.TsGen
+﻿namespace RequestHandlers.TsGen
 {
     internal class RequestHandlers.TsGen
     {
