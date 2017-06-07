@@ -21,6 +21,7 @@ namespace RequestHandlers.TsGen
                 {typeof(JToken), "any"},
                 {typeof(JObject), "any"},
                 {typeof(object), "any"},
+                {typeof(Guid), "string"},
             };
         }
 
