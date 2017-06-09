@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using RequestHandlers.Http;
+using RequestHandlers.TsGen.Helpers;
+using RequestHandlers.TsGen.Inheritance;
+using RequestHandlers.TsGen.RequestHandlers;
 
 namespace RequestHandlers.TsGen
 {

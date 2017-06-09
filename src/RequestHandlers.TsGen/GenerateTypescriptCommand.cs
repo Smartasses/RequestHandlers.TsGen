@@ -1,0 +1,41 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
+using RequestHandlers.Http;
+using RequestHandlers.TsGen.Inheritance;
+
+namespace RequestHandlers.TsGen
+{
+    class GenerateTypescriptCommand
+    {
+        public void Execute(List<string> inputPaths, string outputPath)
+        {
+            var assemblies = inputPaths.Select(x => AssemblyLoadContext.Default.LoadFromAssemblyPath(x)).ToArray();
+
+            var requestHandlerDefinitions = RequestHandlerFinder.InAssembly(assemblies);
+
+            var definitions = requestHandlerDefinitions.SelectMany(x => x.RequestType.GetTypeInfo()
+                    .GetCustomAttributes<HttpRequestAttribute>(true),
+                (definition, attribute) => new HttpRequestHandlerDefinition(attribute, definition)).ToArray();
+
+            //var files = GeneratedFiles(definitions);
+
+            var jsonDiscriminatorTypes = new JsonDiscriminatorHelper(assemblies);
+            var files = new GenerateTypescript(jsonDiscriminatorTypes).GenerateContractsForRequests(definitions).Concat(new[]
+            {
+                new KeyValuePair<string, string>("common.ts", @"export interface IRequestDispatcher {
+    execute<TResponse>(request: HttpRequest<TResponse>): Promise<TResponse>;
+}
+export interface HttpRequest<TResponse> {
+    route: string;
+    queryString?: {[key: string]: string},
+    body?: any,
+    method: string;
+}
+")
+            });
+            new SyncFiles().DoSync(outputPath, files);
+        }
+    }
+}
