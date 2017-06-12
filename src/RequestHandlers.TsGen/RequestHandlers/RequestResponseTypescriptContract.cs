@@ -33,21 +33,20 @@ namespace RequestHandlers.TsGen.RequestHandlers
 
             var allProperties = requestProperties.Concat(responseProperties);
 
-            return $@"import {{ HttpRequest, IRequestDispatcher }} from ""../common"";
+            var typescriptProperties = ConvertProperties(def.Parameters.Select(t => t.PropertyInfo)).ToArray();
+            return $@"import {{ HttpRequest, IRequestDispatcher }} from '../common';
 {Imports(allProperties.Select(x => x.PropertyType).ToArray())}
-export class {def.Definition.RequestType.Name} {{{CodeStr.Foreach(ConvertProperties(def.Parameters.Select(t => t.PropertyInfo)), prop => $@"
-    public {prop.Name}:{prop.TypescriptType};")}
+export class {def.Definition.RequestType.Name} {{{CodeStr.Foreach(typescriptProperties, prop => $@"
+    public {prop.Name}: {prop.TypescriptType};")}
     constructor({CodeStr.Foreach(typescriptProperties, prop => 
     $@"{prop.Name}?: {prop.TypescriptType}, ").TrimEnd(' ', ',')}) {{{CodeStr.Foreach(typescriptProperties, prop => $@"
         this.{prop.Name} = {prop.Name};")}
     }}
     private __request = () => <HttpRequest<{def.Definition.ResponseType.Name}>>{{
-        method: ""{def.HttpMethod.ToString().ToLower()}"",
-        route: ""{def.Route}""{CodeStr.Foreach(routeParameters,
-                    prop => $".replace(\"{{{prop.PropertyName}}}\", this.{CamelCase(prop.PropertyInfo.Name)}{CodeStr.If(prop.PropertyInfo.PropertyType != typeof(string), ".toString()")})")}{
-                CodeStr.If(
-                (def.HttpMethod == HttpMethod.Patch || def.HttpMethod == HttpMethod.Post ||
-                 def.HttpMethod == HttpMethod.Put) && bodyParameters.Any(), $@",
+        method: '{def.HttpMethod.ToString().ToLower()}',
+        route: '{def.Route}'{CodeStr.Foreach(routeParameters, prop =>
+                $".replace('{{{prop.PropertyName}}}', this.{CamelCase(prop.PropertyInfo.Name)}{CodeStr.If(prop.PropertyInfo.PropertyType != typeof(string), ".toString()")})")}{
+        CodeStr.If((def.HttpMethod == HttpMethod.Patch || def.HttpMethod == HttpMethod.Post || def.HttpMethod == HttpMethod.Put) && bodyParameters.Any(), $@",
         body: {{{CodeStr.Foreach(bodyParameters, prop => $@"
             {CamelCase(prop.PropertyInfo.Name)}: this.{CamelCase(prop.PropertyInfo.Name)},").TrimEnd(',')}
         }}")},
