@@ -37,7 +37,11 @@ namespace RequestHandlers.TsGen.RequestHandlers
 {Imports(allProperties.Select(x => x.PropertyType).ToArray())}
 export class {def.Definition.RequestType.Name} {{{CodeStr.Foreach(ConvertProperties(def.Parameters.Select(t => t.PropertyInfo)), prop => $@"
     public {prop.Name}:{prop.TypescriptType};")}
-    public r = () => <HttpRequest<{def.Definition.ResponseType.Name}>>{{
+    constructor({CodeStr.Foreach(typescriptProperties, prop => 
+    $@"{prop.Name}?: {prop.TypescriptType}, ").TrimEnd(' ', ',')}) {{{CodeStr.Foreach(typescriptProperties, prop => $@"
+        this.{prop.Name} = {prop.Name};")}
+    }}
+    private __request = () => <HttpRequest<{def.Definition.ResponseType.Name}>>{{
         method: ""{def.HttpMethod.ToString().ToLower()}"",
         route: ""{def.Route}""{CodeStr.Foreach(routeParameters,
                     prop => $".replace(\"{{{prop.PropertyName}}}\", this.{CamelCase(prop.PropertyInfo.Name)}{CodeStr.If(prop.PropertyInfo.PropertyType != typeof(string), ".toString()")})")}{
@@ -51,7 +55,7 @@ export class {def.Definition.RequestType.Name} {{{CodeStr.Foreach(ConvertPropert
             {CamelCase(prop.PropertyInfo.Name)}: this.{CamelCase(prop.PropertyInfo.Name)}{CodeStr.If(prop.PropertyInfo.PropertyType != typeof(string), ".toString()")},").TrimEnd(',')}
         }}
     }};
-    public execute = (dispatcher: IRequestDispatcher) => dispatcher.execute(this.r());
+    public execute = (dispatcher: IRequestDispatcher) => dispatcher.execute(this.__request());
 }}
 
 export interface {def.Definition.ResponseType.Name}{{{CodeStr.Foreach(ConvertProperties(responseProperties), prop => $@"
