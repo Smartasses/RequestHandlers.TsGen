@@ -57,9 +57,10 @@ export class {def.Definition.RequestType.Name} {{{CodeStr.Foreach(typescriptProp
     public execute = (dispatcher: IRequestDispatcher) => dispatcher.execute(this.__request());
 }}
 
-export interface {def.Definition.ResponseType.Name}{{{CodeStr.Foreach(ConvertProperties(responseProperties), prop => $@"
+export interface {def.Definition.ResponseType.Name} {{{CodeStr.Foreach(ConvertProperties(responseProperties), prop => $@"
     {prop.Name}: {prop.TypescriptType};")}
-}}";
+}}
+";
         }
 
         public override string FileName => $"requests/{_httpRequestHandlerDefinition.Definition.RequestType.Name}";

@@ -22,7 +22,8 @@ namespace RequestHandlers.TsGen.Dtos
             return $@"{Imports(properties.Select(x => x.PropertyType).ToArray())}
 export interface {_dtoType.Name} {{{CodeStr.Foreach(ConvertProperties(properties), prop => $@"
     {prop.Name}: {prop.TypescriptType};")}
-}}";
+}}
+";
         }
     }
 }

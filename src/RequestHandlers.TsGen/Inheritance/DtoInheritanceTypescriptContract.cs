@@ -30,7 +30,8 @@ export class {_dtoType.Name}{CodeStr.If(interfaceBaseTypes.Any(), $" implements 
     static {prop.Name} = {prop.TypescriptType}.{enumName};
     {prop.Name} = {_dtoType.Name}.{prop.Name};", $@"
     {prop.Name}: {prop.TypescriptType};")}")}
-}}";
+}}
+";
         }
     }
 }

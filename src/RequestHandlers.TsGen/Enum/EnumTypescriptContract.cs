@@ -21,7 +21,8 @@ namespace RequestHandlers.TsGen.Enum
                     System.Enum.GetValues(_enumType).Cast<object>(), enumValue => $@"
     {System.Enum.GetName(_enumType, enumValue)} = {Convert.ChangeType(enumValue, System.Enum.GetUnderlyingType(_enumType)).ToString()},")
                 .TrimEnd(',')}
-}}";
+}}
+";
         }
     }
 }

@@ -11,7 +11,7 @@ namespace RequestHandlers.TsGen
         public void Execute(List<string> inputPaths, string outputPath)
         {
             var assemblies = LoadAssembliesHelper.Load(inputPaths);
-
+            var types = assemblies[0].GetTypes();
             var requestHandlerDefinitions = RequestHandlerFinder.InAssembly(assemblies);
 
             var definitions = requestHandlerDefinitions.SelectMany(x => x.RequestType.GetTypeInfo()

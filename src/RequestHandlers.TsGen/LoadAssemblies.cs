@@ -9,7 +9,7 @@ namespace RequestHandlers.TsGen
     {
         public static Assembly[] Load(List<string> inputPaths)
         {
-            return inputPaths.Select(x => Assembly.LoadFrom(x)).ToArray();
+            return inputPaths.Select(x => Assembly.Load(x)).ToArray();
         }
     }
 }

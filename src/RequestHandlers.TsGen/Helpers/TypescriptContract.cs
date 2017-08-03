@@ -58,7 +58,7 @@ namespace RequestHandlers.TsGen.Helpers
             var references = Ctx.GetTypeScriptReferences(types);
             foreach (var propertyInfo in references)
             {
-                sb.AppendLine($"import {{ {string.Join(", ", propertyInfo.Types.Select(x => x.Name)) } }} from \"../{propertyInfo.FileName}\";");
+                sb.AppendLine($"import {{ {string.Join(", ", propertyInfo.Types.Select(x => x.Name)) } }} from '../{propertyInfo.FileName}';");
             }
             return sb.ToString();
         }

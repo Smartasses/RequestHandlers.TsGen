@@ -5,6 +5,20 @@ using System.Reflection;
 
 namespace RequestHandlers.TsGen.Inheritance
 {
+    static class SafeFunctions
+    {
+        public static T GetCustomAttributeSafe<T>(this PropertyInfo propertyInfo) where T : Attribute
+        {
+            try
+            {
+                return propertyInfo.GetCustomAttribute<T>();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
     public class JsonDiscriminatorHelper
     {
         public class Result
@@ -20,7 +34,7 @@ namespace RequestHandlers.TsGen.Inheritance
                 .SelectMany(x => x.GetTypes()).ToArray()
                 .SelectMany(x => x
                     .GetProperties(BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public)
-                    .Select(p => new { Property = p, Descriminator = p.GetCustomAttribute<JsonDiscriminatorAttribute>() })
+                    .Select(p => new { Property = p, Descriminator = p.GetCustomAttributeSafe<JsonDiscriminatorAttribute>() })
                     .Where(p => p.Descriminator != null), (type, property) => new { Type = type, property.Property })
                 .Select(x =>
                 {
