@@ -18,6 +18,18 @@ namespace RequestHandlers.TsGen.Inheritance
                 return null;
             }
         }
+        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        {
+            if (assembly == null) throw new ArgumentNullException(nameof(assembly));
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
+            }
+        }
     }
     public class JsonDiscriminatorHelper
     {
@@ -31,7 +43,7 @@ namespace RequestHandlers.TsGen.Inheritance
         public JsonDiscriminatorHelper(params Assembly[] assemblies)
         {
             var types = assemblies
-                .SelectMany(x => x.GetTypes()).ToArray()
+                .SelectMany(x => x.GetLoadableTypes()).ToArray()
                 .SelectMany(x => x
                     .GetProperties(BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public)
                     .Select(p => new { Property = p, Descriminator = p.GetCustomAttributeSafe<JsonDiscriminatorAttribute>() })
