@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
 using RequestHandlers.Http;
 using RequestHandlers.TsGen.Inheritance;
 
@@ -11,7 +10,7 @@ namespace RequestHandlers.TsGen
     {
         public void Execute(List<string> inputPaths, string outputPath)
         {
-            var assemblies = inputPaths.Select(x => AssemblyLoadContext.Default.LoadFromAssemblyPath(x)).ToArray();
+            var assemblies = LoadAssembliesHelper.Load(inputPaths);
 
             var requestHandlerDefinitions = RequestHandlerFinder.InAssembly(assemblies);
 

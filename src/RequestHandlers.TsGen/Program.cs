@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NET45
+#else
+using System;
 using Microsoft.Extensions.CommandLineUtils;
 
 namespace RequestHandlers.TsGen
@@ -36,3 +38,4 @@ namespace RequestHandlers.TsGen
         }
     }
 }
+#endif

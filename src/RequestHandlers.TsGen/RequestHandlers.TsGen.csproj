@@ -1,23 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <TargetFrameworks>netcoreapp1.1;net45</TargetFrameworks>
     <AssemblyName>dotnet-tsg</AssemblyName>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
-  <PackageId>RequestHandlers.Tsg</PackageId>
-  <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-  <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-  <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-  <Authors>Glenn Dierckx, Benny Michielsen</Authors>
-  <Description>Typescript generation for RequestHandlers</Description>
-  <PackageProjectUrl>https://github.com/Smartasses/RequestHandlers.TsGen</PackageProjectUrl>
-  <RepositoryUrl>https://github.com/Smartasses/RequestHandlers.TsGen</RepositoryUrl>
+    <OutputType>Exe</OutputType>
+    <PackageId>RequestHandlers.Tsg</PackageId>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <Authors>Glenn Dierckx, Benny Michielsen</Authors>
+    <Description>Typescript generation for RequestHandlers</Description>
+    <PackageProjectUrl>https://github.com/Smartasses/RequestHandlers.TsGen</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Smartasses/RequestHandlers.TsGen</RepositoryUrl>
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">1.0.4</RuntimeFrameworkVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <PackageReference Include="FluentCommandLineParser" Version="1.4.3" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net45' ">
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <PackageReference Include="RequestHandlers" Version="3.1.1" />
+    <PackageReference Include="RequestHandlers" Version="3.1.3" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 </Project>
