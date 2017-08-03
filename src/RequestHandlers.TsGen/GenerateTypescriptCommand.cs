@@ -11,14 +11,11 @@ namespace RequestHandlers.TsGen
         public void Execute(List<string> inputPaths, string outputPath)
         {
             var assemblies = LoadAssembliesHelper.Load(inputPaths);
-            var types = assemblies[0].GetTypes();
             var requestHandlerDefinitions = RequestHandlerFinder.InAssembly(assemblies);
 
             var definitions = requestHandlerDefinitions.SelectMany(x => x.RequestType.GetTypeInfo()
                     .GetCustomAttributes<HttpRequestAttribute>(true),
                 (definition, attribute) => new HttpRequestHandlerDefinition(attribute, definition)).ToArray();
-
-            //var files = GeneratedFiles(definitions);
 
             var jsonDiscriminatorTypes = new JsonDiscriminatorHelper(assemblies);
             var files = new GenerateTypescript(jsonDiscriminatorTypes).GenerateContractsForRequests(definitions).Concat(new[]
