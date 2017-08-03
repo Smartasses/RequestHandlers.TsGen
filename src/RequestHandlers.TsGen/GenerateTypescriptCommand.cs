@@ -24,7 +24,7 @@ namespace RequestHandlers.TsGen
             var files = new GenerateTypescript(jsonDiscriminatorTypes).GenerateContractsForRequests(definitions).Concat(new[]
             {
                 new KeyValuePair<string, string>("common.ts", @"export interface IRequestDispatcher {
-    execute<TResponse>(request: HttpRequest<TResponse>): Promise<TResponse>;
+    execute<TResponse>(request: HttpRequest<TResponse>): Observable<TResponse>;
 }
 export interface HttpRequest<TResponse> {
     route: string;
