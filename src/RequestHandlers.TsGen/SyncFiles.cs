@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
 using RequestHandlers.TsGen.Helpers;
 
 namespace RequestHandlers.TsGen
@@ -12,18 +15,57 @@ namespace RequestHandlers.TsGen
 
         public void DoSync(string path, IEnumerable<KeyValuePair<string, string>> files)
         {
-            files.ToArray();
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentNullException(nameof(path));
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            
             var dict = files.ToDictionary(x => Path.Combine(path, x.Key), x => x.Value);
-            var typescriptFiles = Directory.GetFileSystemEntries(path, "*.ts", SearchOption.AllDirectories);
-            typescriptFiles.Where(x => !dict.ContainsKey(x)).ForEach(File.Delete);
-            Directory.GetDirectories(path, "*", SearchOption.AllDirectories).Where(x => Directory.GetFiles(x).Length == 0).ForEach(
-                x =>
+            RemoveUnused(path, dict);
+            CreateDirectories(dict);
+
+            Parallel.ForEach(dict.Select(x => new {FilePath = x.Key, Content = x.Value, Hash = GetHash(x.Value)}),
+                file =>
                 {
-                    if (Directory.Exists(x))
-                        Directory.Delete(x, true);
+                    var hashComment = $"// hash: {file.Hash}";
+                    bool needsWrite = false;
+                    using (var strm = new FileStream(file.FilePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                    using (var fileReader = new StreamReader(strm))
+                    {
+                        var hash = fileReader.ReadLine()?.Trim();
+                        needsWrite = hash != hashComment;
+                    }
+                    if (needsWrite)
+                    {
+                        Console.WriteLine("Writing file: " + file.FilePath);
+                        using (var strm = new FileStream(file.FilePath, FileMode.Create, FileAccess.Write,
+                            FileShare.Write))
+                        using (var fileWriter = new StreamWriter(strm))
+                        {
+                            fileWriter.WriteLine(hashComment);
+                            fileWriter.Write(file.Content);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Skip file: " + file.FilePath);
+                    }
                 });
+        }
+        
+        private string GetHash(string content)
+        {
+            var messageBytes = Encoding.UTF8.GetBytes(content);
+#if NET45
+            var sha1Managed = new SHA1Managed();
+            var hash = sha1Managed.ComputeHash(messageBytes);
+#else
+            var sha1 = SHA1.Create();
+            var hash = sha1.ComputeHash(messageBytes);
+#endif
+            return Convert.ToBase64String(hash);
+        }
+
+        private static void CreateDirectories(Dictionary<string, string> dict)
+        {
             var dirHash = new HashSet<string>();
             foreach (var file in dict)
             {
@@ -37,30 +79,19 @@ namespace RequestHandlers.TsGen
                     }
                 }
             }
-            dict.AsParallel().ForEach(file =>
-            {
-                RetryTimes(() => File.WriteAllText(file.Key, file.Value), 3);
-            });
         }
 
-        public void RetryTimes(Action action, int times = 3, int msDelay = 10)
+        private static void RemoveUnused(string path, Dictionary<string, string> dict)
         {
-            int tryCount = 0;
-            bool failed = false;
-            do
-            {
-                tryCount++;
-                try
-                {
-                    action();
-                    failed = false;
-                }
-                catch
-                {
-                    failed = true;
-                    Thread.Sleep(msDelay * tryCount);
-                }
-            } while (failed && tryCount < times);
+            var typescriptFiles = Directory.GetFileSystemEntries(path, "*.ts", SearchOption.AllDirectories);
+            typescriptFiles.Where(x => !dict.ContainsKey(x)).ForEach(File.Delete);
+            Directory.GetDirectories(path, "*", SearchOption.AllDirectories).Where(x => Directory.GetFiles(x).Length == 0)
+                .ForEach(
+                    x =>
+                    {
+                        if (Directory.Exists(x))
+                            Directory.Delete(x, true);
+                    });
         }
     }
 }
