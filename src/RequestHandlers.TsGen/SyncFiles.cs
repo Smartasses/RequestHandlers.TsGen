@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using RequestHandlers.TsGen.Helpers;
 
 namespace RequestHandlers.TsGen
@@ -35,8 +36,31 @@ namespace RequestHandlers.TsGen
                         Directory.CreateDirectory(dir);
                     }
                 }
-                File.WriteAllText(file.Key, file.Value);
             }
+            dict.AsParallel().ForEach(file =>
+            {
+                RetryTimes(() => File.WriteAllText(file.Key, file.Value), 3);
+            });
+        }
+
+        public void RetryTimes(Action action, int times = 3, int msDelay = 10)
+        {
+            int tryCount = 0;
+            bool failed = false;
+            do
+            {
+                tryCount++;
+                try
+                {
+                    action();
+                    failed = false;
+                }
+                catch
+                {
+                    failed = true;
+                    Thread.Sleep(msDelay * tryCount);
+                }
+            } while (failed && tryCount < times);
         }
     }
 }

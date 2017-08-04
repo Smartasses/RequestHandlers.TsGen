@@ -1,32 +1,41 @@
 ﻿#if NET45
 using System;
-using Fclp;
-using Fclp.Internals.Extensions;
 using System.Collections.Generic;
+using System.Linq;
+using CommandLine;
+using CommandLine.Text;
 
 namespace RequestHandlers.TsGen
 {
+    class Options {
+      [Option('o', "output", Required = true, HelpText = "Output directory.")]
+      public string OutputDirectory { get; set; }
+        
+      [OptionList('a', "assemblies", Separator = ';', HelpText = "Assemblies.")]
+      public IList<string> Assemblies { get; set; }
+    
+      [ParserState]
+      public IParserState LastParserState { get; set; }
+    
+      [HelpOption]
+      public string GetUsage() {
+        return HelpText.AutoBuild(this,
+          (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
+      }
+    }
     class Program
     {
         static void Main(string[] args)
         {
-            var p = new FluentCommandLineParser();
-            var path = string.Empty;
-            var inputPaths = new List<string>();
-            p.Setup<string>('o')
-                .Callback(record => path = record)
-                .Required();
-            p.Setup<List<string>>('a', "assemblies")
-                .Callback(paths => inputPaths = paths)
-                .Required();
-
-            var commandLineParserResult = p.Parse(args);
-            if (commandLineParserResult.HasErrors)
-            {
-                Console.WriteLine(commandLineParserResult.ErrorText);
-                return;
+            var options = new Options();
+            if (CommandLine.Parser.Default.ParseArguments(args, options)) {
+                foreach(var input in options.Assemblies)
+                {
+                    Console.WriteLine("Input: " + input);
+                }
+                Console.WriteLine("Ouput: " + options.OutputDirectory);
+                new GenerateTypescriptCommand().Execute(options.Assemblies.ToList(), options.OutputDirectory);
             }
-            new GenerateTypescriptCommand().Execute(inputPaths, path);
         }
     }
 }

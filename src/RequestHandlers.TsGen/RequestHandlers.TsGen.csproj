@@ -21,14 +21,14 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="FluentCommandLineParser" Version="1.4.3" />
+    <PackageReference Include="CommandLineParser" Version="1.9.71" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net45' ">
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="RequestHandlers" Version="3.1.5" />
+    <PackageReference Include="RequestHandlers" Version="3.1.7" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
