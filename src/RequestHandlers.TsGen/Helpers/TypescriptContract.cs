@@ -49,7 +49,7 @@ namespace RequestHandlers.TsGen.Helpers
             {
                 return $"{GetTypescriptType(enumerable.GetGenericArguments()[0])}[]";
             }
-            return argPropertyType.Name;
+            return actualType.Name;
         }
 
         protected string Imports(params Type[] types)
