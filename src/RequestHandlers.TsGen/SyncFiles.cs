@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using RequestHandlers.TsGen.Helpers;
 
@@ -36,13 +37,15 @@ namespace RequestHandlers.TsGen
                     if (needsWrite)
                     {
                         Console.WriteLine("Writing file: " + file.FilePath);
-                        using (var strm = new FileStream(file.FilePath, FileMode.Create, FileAccess.Write,
-                            FileShare.Write))
-                        using (var fileWriter = new StreamWriter(strm))
-                        {
-                            fileWriter.WriteLine(hashComment);
-                            fileWriter.Write(file.Content);
-                        }
+                        RetryTimes(() => {
+                            using (var strm = new FileStream(file.FilePath, FileMode.Create, FileAccess.Write,
+                                FileShare.Write))
+                            using (var fileWriter = new StreamWriter(strm))
+                            {
+                                fileWriter.WriteLine(hashComment);
+                                fileWriter.Write(file.Content);
+                            }
+                        }, 3);
                     }
                     else
                     {
@@ -50,7 +53,26 @@ namespace RequestHandlers.TsGen
                     }
                 });
         }
-        
+
+        private void RetryTimes(Action action, int times)
+        {
+            var tryCount = 0;
+            bool succeeded = false;
+            do
+            {
+                try
+                {
+                    action();
+                    succeeded = true;
+                }
+                catch
+                {
+                    tryCount++;
+                    Thread.Sleep(tryCount * 50 + 50);
+                }
+            } while (!succeeded && times > tryCount);
+        }
+
         private string GetHash(string content)
         {
             var messageBytes = Encoding.UTF8.GetBytes(content);
