@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using RequestHandlers.TsGen.Helpers;
 
@@ -27,28 +28,51 @@ namespace RequestHandlers.TsGen
                 {
                     var hashComment = $"// hash: {file.Hash}";
                     bool needsWrite = false;
-                    using (var strm = new FileStream(file.FilePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
-                    using (var fileReader = new StreamReader(strm))
-                    {
-                        var hash = fileReader.ReadLine()?.Trim();
-                        needsWrite = hash != hashComment;
-                    }
-                    if (needsWrite)
-                    {
-                        Console.WriteLine("Writing file: " + file.FilePath);
-                        using (var strm = new FileStream(file.FilePath, FileMode.Create, FileAccess.Write,
-                            FileShare.Write))
-                        using (var fileWriter = new StreamWriter(strm))
+                    RetryTimes(() => {
+                        using (var strm = new FileStream(file.FilePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                        using (var fileReader = new StreamReader(strm))
                         {
-                            fileWriter.WriteLine(hashComment);
-                            fileWriter.Write(file.Content);
+                            var hash = fileReader.ReadLine()?.Trim();
+                            needsWrite = hash != hashComment;
                         }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Skip file: " + file.FilePath);
-                    }
+                        if (needsWrite)
+                        {
+                            Console.WriteLine("Writing file: " + file.FilePath);
+                            RetryTimes(() => {
+                                using (var strm = new FileStream(file.FilePath, FileMode.Create, FileAccess.Write,
+                                    FileShare.Write))
+                                using (var fileWriter = new StreamWriter(strm))
+                                {
+                                    fileWriter.WriteLine(hashComment);
+                                    fileWriter.Write(file.Content);
+                                }
+                            }, 3);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Skip file: " + file.FilePath);
+                        }
+                    }, 3);
                 });
+        }
+
+        private void RetryTimes(Action action, int times)
+        {
+            var tryCount = 0;
+            bool succeeded = false;
+            do
+            {
+                try
+                {
+                    action();
+                    succeeded = true;
+                }
+                catch
+                {
+                    tryCount++;
+                    Thread.Sleep(tryCount * 50 + 50);
+                }
+            } while (!succeeded && times > tryCount);
         }
         
         private string GetHash(string content)
