@@ -19,7 +19,7 @@ namespace RequestHandlers.TsGen
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentNullException(nameof(path));
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             
-            var dict = files.ToDictionary(x => Path.Combine(path, x.Key), x => x.Value);
+            var dict = files.ToDictionary(x => Path.GetFullPath(Path.Combine(path, x.Key)), x => x.Value);
             RemoveUnused(path, dict);
             CreateDirectories(dict);
 
@@ -108,7 +108,7 @@ namespace RequestHandlers.TsGen
         private static void RemoveUnused(string path, Dictionary<string, string> dict)
         {
             var typescriptFiles = Directory.GetFileSystemEntries(path, "*.ts", SearchOption.AllDirectories);
-            typescriptFiles.Where(x => !dict.ContainsKey(x)).ForEach(File.Delete);
+            typescriptFiles.Where(x => !dict.ContainsKey(Path.GetFullPath(x))).ForEach(File.Delete);
             Directory.GetDirectories(path, "*", SearchOption.AllDirectories).Where(x => Directory.GetFiles(x).Length == 0)
                 .ForEach(
                     x =>
