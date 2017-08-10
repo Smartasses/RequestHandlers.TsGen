@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 
 namespace RequestHandlers.TsGen.Helpers
 {
@@ -18,8 +17,6 @@ namespace RequestHandlers.TsGen.Helpers
                 {typeof(long), "number"},
                 {typeof(short), "number"},
                 {typeof(double), "number"},
-                {typeof(JToken), "any"},
-                {typeof(JObject), "any"},
                 {typeof(object), "any"},
                 {typeof(Guid), "string"},
             };

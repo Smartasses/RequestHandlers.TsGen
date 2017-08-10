@@ -4,17 +4,13 @@ using System.Linq;
 using System.Reflection;
 using RequestHandlers.TsGen.Dtos;
 using RequestHandlers.TsGen.Enum;
-using RequestHandlers.TsGen.Inheritance;
 
 namespace RequestHandlers.TsGen.Helpers
 {
     class TypescriptContext
     {
-        private readonly JsonDiscriminatorHelper _jsonDiscriminatorTypes;
-
-        public TypescriptContext(JsonDiscriminatorHelper jsonDiscriminatorTypes)
+        public TypescriptContext()
         {
-            _jsonDiscriminatorTypes = jsonDiscriminatorTypes;
             _files = new List<TypescriptContract>();
         }
 
@@ -39,32 +35,11 @@ namespace RequestHandlers.TsGen.Helpers
             {
                 return GetTypeScriptReference(enumerable.GetGenericArguments()[0]);
             }
-
-                JsonDiscriminatorHelper.Result jsonDiscriminatorType;
             if (actualType.GetTypeInfo().IsEnum)
             {
                 var enumContract = new EnumTypescriptContract(actualType, this);
                 Add(enumContract);
                 return enumContract;
-            }
-            else if (_jsonDiscriminatorTypes.Mapping.TryGetValue(actualType, out jsonDiscriminatorType))
-            {
-                TypescriptContract contract;
-                if (!jsonDiscriminatorType.Mapping.Values.Contains(actualType))
-                {
-                    contract = new DtoTypescriptContract(actualType, this);
-                    Add(contract);
-                }
-                else
-                {
-                    contract = new DtoInheritanceTypescriptContract(actualType, this, jsonDiscriminatorType);
-                    Add(contract);
-                }
-                foreach (var implementationType in jsonDiscriminatorType.Mapping.Values)
-                {
-                    GetTypeScriptReference(implementationType);
-                }
-                return contract;
             }
             else
             {

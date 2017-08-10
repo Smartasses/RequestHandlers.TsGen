@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using RequestHandlers.Http;
-using RequestHandlers.TsGen.Inheritance;
 
 namespace RequestHandlers.TsGen
 {
@@ -17,8 +16,7 @@ namespace RequestHandlers.TsGen
                     .GetCustomAttributes<HttpRequestAttribute>(true),
                 (definition, attribute) => new HttpRequestHandlerDefinition(attribute, definition)).ToArray();
 
-            var jsonDiscriminatorTypes = new JsonDiscriminatorHelper(assemblies);
-            var files = new GenerateTypescript(jsonDiscriminatorTypes).GenerateContractsForRequests(definitions).Concat(new[]
+            var files = new GenerateTypescript().GenerateContractsForRequests(definitions).Concat(new[]
             {
                 new KeyValuePair<string, string>("common.ts", @"import {Observable} from 'rxjs/Observable';
 export interface IRequestDispatcher {

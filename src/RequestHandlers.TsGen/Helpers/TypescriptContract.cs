@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace RequestHandlers.TsGen.Helpers
 {
@@ -65,8 +64,7 @@ namespace RequestHandlers.TsGen.Helpers
 
         protected static IEnumerable<PropertyInfo> GetProperties(Type type)
         {
-            var parameters = type.GetProperties(BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.SetProperty | BindingFlags.Public)
-                .Where(x => !x.GetCustomAttributes<JsonIgnoreAttribute>(true).Any());
+            var parameters = type.GetProperties(BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.SetProperty | BindingFlags.Public);
             return parameters;
         }
     }
