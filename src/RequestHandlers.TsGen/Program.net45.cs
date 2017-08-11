@@ -27,14 +27,22 @@ namespace RequestHandlers.TsGen
     {
         static void Main(string[] args)
         {
-            var options = new Options();
-            if (CommandLine.Parser.Default.ParseArguments(args, options)) {
-                foreach(var input in options.Assemblies)
+            try
+            {
+                var options = new Options();
+                if (CommandLine.Parser.Default.ParseArguments(args, options))
                 {
-                    Console.WriteLine("Input: " + input);
+                    foreach (var input in options.Assemblies)
+                    {
+                        Console.WriteLine("Input: " + input);
+                    }
+                    Console.WriteLine("Ouput: " + options.OutputDirectory);
+                    new GenerateTypescriptCommand().Execute(options.Assemblies.ToList(), options.OutputDirectory);
                 }
-                Console.WriteLine("Ouput: " + options.OutputDirectory);
-                new GenerateTypescriptCommand().Execute(options.Assemblies.ToList(), options.OutputDirectory);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
     }

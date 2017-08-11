@@ -19,7 +19,14 @@ namespace RequestHandlers.TsGen
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentNullException(nameof(path));
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             
-            var dict = files.ToDictionary(x => Path.GetFullPath(Path.Combine(path, x.Key)), x => x.Value);
+            var allFiles = files
+                .GroupBy(x => Path.GetFullPath(Path.Combine(path, x.Key)), x => x.Value)
+                .ToArray();
+
+            var duplicates = allFiles.Where(x => x.Count() > 1).ToArray();
+            
+            var dict = allFiles.ToDictionary(x => x.Key, x => x.First());
+            
             RemoveUnused(path, dict);
             CreateDirectories(dict);
 
