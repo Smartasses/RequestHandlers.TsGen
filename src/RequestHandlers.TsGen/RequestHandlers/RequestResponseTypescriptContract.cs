@@ -38,9 +38,12 @@ namespace RequestHandlers.TsGen.RequestHandlers
 {Imports(allProperties.Select(x => x.PropertyType).ToArray())}
 export class {def.Definition.RequestType.Name} {{{CodeStr.Foreach(typescriptProperties, prop => $@"
     public {prop.Name}: {prop.TypescriptType};")}
-    constructor({CodeStr.Foreach(typescriptProperties, prop => 
-    $@"{prop.Name}?: {prop.TypescriptType}, ").TrimEnd(' ', ',')}) {{{CodeStr.Foreach(typescriptProperties, prop => $@"
-        this.{prop.Name} = {prop.Name};")}
+    constructor(init?: {{{CodeStr.Foreach(typescriptProperties, prop => 
+                    $@"{prop.Name}?: {prop.TypescriptType}, ").TrimEnd(' ', ',')}}}) {{
+        if(init) {{
+{CodeStr.Foreach(typescriptProperties, prop => $@"
+            this.{prop.Name} = init.{prop.Name};")}
+        }}
     }}
     private __request = () => <HttpRequest<{def.Definition.ResponseType.Name}>>{{
         method: '{def.HttpMethod.ToString().ToLower()}',
