@@ -49,7 +49,7 @@ export class {def.Definition.RequestType.Name} {{{CodeStr.Foreach(typescriptProp
         method: '{def.HttpMethod.ToString().ToLower()}',
         route: '{def.Route}'{CodeStr.Foreach(routeParameters, prop =>
                 $".replace('{{{prop.PropertyName}}}', this.{CamelCase(prop.PropertyInfo.Name)}{CodeStr.If(prop.PropertyInfo.PropertyType != typeof(string), ".toString()")})")}{
-        CodeStr.If((def.HttpMethod == HttpMethod.Patch || def.HttpMethod == HttpMethod.Post || def.HttpMethod == HttpMethod.Put) && bodyParameters.Any(), $@",
+        CodeStr.If((def.HttpMethod == HttpMethod.Patch || def.HttpMethod == HttpMethod.Delete || def.HttpMethod == HttpMethod.Post || def.HttpMethod == HttpMethod.Put) && bodyParameters.Any(), $@",
         body: {{{CodeStr.Foreach(bodyParameters, prop => $@"
             {CamelCase(prop.PropertyInfo.Name)}: this.{CamelCase(prop.PropertyInfo.Name)},").TrimEnd(',')}
         }}")},
